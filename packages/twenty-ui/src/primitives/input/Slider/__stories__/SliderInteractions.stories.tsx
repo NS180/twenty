@@ -16,14 +16,18 @@ import { ComponentDecorator } from '@ui/testing';
 import { Slider } from '../Slider';
 import { type SliderRootProps } from '../types/SliderRootProps';
 
+const SliderControlExample = () => (
+  <Slider.Control data-testid="slider-control">
+    <Slider.Track>
+      <Slider.Indicator />
+      <Slider.Thumb data-testid="slider-thumb" aria-label="Volume" />
+    </Slider.Track>
+  </Slider.Control>
+);
+
 const SliderExample = (props: SliderRootProps<number>) => (
   <Slider.Root {...props}>
-    <Slider.Control data-testid="slider-control">
-      <Slider.Track>
-        <Slider.Indicator />
-        <Slider.Thumb aria-label="Volume" />
-      </Slider.Track>
-    </Slider.Control>
+    <SliderControlExample />
   </Slider.Root>
 );
 
@@ -45,14 +49,41 @@ const ResizableSliderExample = (props: SliderRootProps<number>) => {
 
   return (
     <div style={{ width }}>
+      <SliderExample {...props} />
+      <button type="button" onClick={() => setWidth(400)}>
+        Widen volume
+      </button>
+    </div>
+  );
+};
+
+const RevealedSliderExample = (props: SliderRootProps<number>) => {
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  return (
+    <div style={{ width: '100%' }}>
+      <div style={{ display: isRevealed ? 'block' : 'none' }}>
+        <SliderExample {...props} />
+      </div>
+      <button type="button" onClick={() => setIsRevealed(true)}>
+        Show volume
+      </button>
+    </div>
+  );
+};
+
+const AddedControlSliderExample = (props: SliderRootProps<number>) => {
+  const [isControlAdded, setIsControlAdded] = useState(false);
+  const [width, setWidth] = useState(80);
+
+  return (
+    <div style={{ width }}>
       <Slider.Root {...props}>
-        <Slider.Control data-testid="slider-control">
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb data-testid="slider-thumb" aria-label="Volume" />
-          </Slider.Track>
-        </Slider.Control>
+        {isControlAdded && <SliderControlExample />}
       </Slider.Root>
+      <button type="button" onClick={() => setIsControlAdded(true)}>
+        Add volume control
+      </button>
       <button type="button" onClick={() => setWidth(400)}>
         Widen volume
       </button>
@@ -287,6 +318,56 @@ export const ResizedControl: Story = {
     );
     await waitFor(() => expectThumbAtValue({ control, thumb, value: 40 }));
     await expect(slider).toHaveValue('40');
+    await expect(args.onValueChange).not.toHaveBeenCalled();
+    await expect(args.onValueCommitted).not.toHaveBeenCalled();
+  },
+};
+
+export const RevealedControl: Story = {
+  decorators: [ComponentDecorator],
+  render: (args) => <RevealedSliderExample {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const slider = canvas.getByRole('slider', { hidden: true });
+    const control = canvas.getByTestId('slider-control');
+    const thumb = canvas.getByTestId('slider-thumb');
+
+    await expect(thumb).not.toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Show volume' }));
+    await waitFor(() => expect(thumb).toBeVisible());
+    await waitFor(() => expectThumbAtValue({ control, thumb, value: 40 }));
+    await expect(canvas.getByRole('slider', { name: 'Volume' })).toBe(slider);
+    await expect(slider).toHaveValue('40');
+    await expect(args.onValueChange).not.toHaveBeenCalled();
+    await expect(args.onValueCommitted).not.toHaveBeenCalled();
+  },
+};
+
+export const RevealedClientOnlyControl: Story = {
+  ...RevealedControl,
+  args: { thumbAlignment: 'edge-client-only' },
+};
+
+export const AddedControl: Story = {
+  decorators: [ComponentDecorator],
+  parameters: { container: { width: 400 } },
+  render: (args) => <AddedControlSliderExample {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Add volume control' }),
+    );
+
+    const control = await canvas.findByTestId('slider-control');
+    const thumb = canvas.getByTestId('slider-thumb');
+
+    await waitFor(() => expectThumbAtValue({ control, thumb, value: 40 }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Widen volume' }));
+    await waitFor(() =>
+      expect(control.getBoundingClientRect().width).toBeGreaterThan(300),
+    );
+    await waitFor(() => expectThumbAtValue({ control, thumb, value: 40 }));
     await expect(args.onValueChange).not.toHaveBeenCalled();
     await expect(args.onValueCommitted).not.toHaveBeenCalled();
   },

@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { createRef, type ReactNode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -76,44 +76,15 @@ runComponentConformance({
 });
 
 describe('Slider measurement registration', () => {
-  let controlWidth = 0;
   const observedElements = new Set<Element>();
-  const resizeCallbacks = new Set<() => void>();
 
   const findVolumeSlider = () => screen.getByRole('slider', { hidden: true });
 
-  const resizeVolumeControl = async (width: number) => {
-    await act(async () => {
-      controlWidth = width;
-
-      for (const callback of resizeCallbacks) {
-        callback();
-      }
-    });
-  };
-
   beforeEach(() => {
-    controlWidth = 0;
     observedElements.clear();
-    resizeCallbacks.clear();
-
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
-      function (this: HTMLElement) {
-        const width =
-          this.dataset.testid === 'volume-control' ? controlWidth : 16;
-
-        return new DOMRect(0, 0, width, 16);
-      },
-    );
 
     class ResizeObserverStub {
       private readonly observedTargets = new Set<Element>();
-      private readonly notify: () => void;
-
-      constructor(callback: ResizeObserverCallback) {
-        this.notify = () => callback([], this);
-        resizeCallbacks.add(this.notify);
-      }
 
       observe(target: Element) {
         this.observedTargets.add(target);
@@ -131,7 +102,6 @@ describe('Slider measurement registration', () => {
         }
 
         this.observedTargets.clear();
-        resizeCallbacks.delete(this.notify);
       }
     }
 
@@ -140,78 +110,10 @@ describe('Slider measurement registration', () => {
 
   afterEach(() => {
     cleanup();
-    vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 
-  it.each(['edge', 'edge-client-only'] as const)(
-    'shows %s thumbs once geometry arrives after mounting',
-    async (thumbAlignment) => {
-      const onValueChange = vi.fn();
-      const onValueCommitted = vi.fn();
-      render(
-        <Slider.Root
-          defaultValue={40}
-          thumbAlignment={thumbAlignment}
-          onValueChange={onValueChange}
-          onValueCommitted={onValueCommitted}
-        >
-          <Slider.Control data-testid="volume-control">
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label="Volume" />
-            </Slider.Track>
-          </Slider.Control>
-        </Slider.Root>,
-      );
-      const slider = findVolumeSlider();
-
-      await act(async () => {
-        await Promise.resolve();
-      });
-
-      expect(slider).not.toBeVisible();
-
-      await resizeVolumeControl(200);
-
-      expect(slider).toBeVisible();
-      expect(slider).toHaveValue('40');
-
-      await resizeVolumeControl(400);
-
-      expect(findVolumeSlider()).toBe(slider);
-      expect(slider).toBeVisible();
-      expect(onValueChange).not.toHaveBeenCalled();
-      expect(onValueCommitted).not.toHaveBeenCalled();
-    },
-  );
-
-  it('registers a control added after the root has mounted', async () => {
-    const { rerender } = render(<Slider.Root defaultValue={40} />);
-
-    rerender(
-      <Slider.Root defaultValue={40}>
-        <Slider.Control data-testid="volume-control">
-          <Slider.Thumb aria-label="Volume" />
-        </Slider.Control>
-      </Slider.Root>,
-    );
-
-    const slider = findVolumeSlider();
-
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(slider).not.toBeVisible();
-
-    await resizeVolumeControl(200);
-
-    expect(slider).toBeVisible();
-  });
-
   it('preserves custom rendering, callback refs, and form inputs', () => {
-    controlWidth = 200;
     const controlRefCleanup = vi.fn();
     const controlRef = vi.fn(() => controlRefCleanup);
     const renderedControlRef = createRef<HTMLElement>();
@@ -219,7 +121,6 @@ describe('Slider measurement registration', () => {
       <Slider.Root defaultValue={40} name="volume">
         <Slider.Control
           ref={controlRef}
-          data-testid="volume-control"
           render={<section ref={renderedControlRef} />}
         >
           <Slider.Thumb aria-label="Volume" />
