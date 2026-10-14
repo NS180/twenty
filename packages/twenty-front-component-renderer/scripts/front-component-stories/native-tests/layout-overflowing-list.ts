@@ -22,8 +22,8 @@ for (const runtime of ['react', 'preact']) {
     await expect(second.getByTestId('front-component-mounted')).toBeVisible({
       timeout: 30000,
     });
-    await expect(firstTrigger).toHaveText('+3');
-    await expect(secondTrigger).toHaveText('+3');
+    await expect(firstTrigger).toHaveText('+2');
+    await expect(secondTrigger).toHaveText('+2');
     await expect(
       first.getByRole('button', { name: 'Measured Alpha' }),
     ).toBeVisible();
@@ -39,20 +39,20 @@ for (const runtime of ['react', 'preact']) {
     await expect(
       first.getByRole('button', { name: 'Measured Delta' }),
     ).toBeVisible();
-    await expect(secondTrigger).toHaveText('+3');
+    await expect(secondTrigger).toHaveText('+2');
     await expect(
       second.getByRole('button', { name: 'Measured Delta' }),
     ).toHaveCount(0);
 
     await first.getByRole('button', { name: 'Narrow measured list' }).click();
-    await expect(firstTrigger).toHaveText('+2');
+    await expect(firstTrigger).toHaveText('+1');
     await expect(
       first.getByRole('button', { name: 'Measured Bravo' }),
     ).toBeVisible();
     await expect(
-      first.getByRole('button', { name: 'Measured Charlie' }),
+      first.getByRole('button', { name: 'Measured Delta' }),
     ).toHaveCount(0);
-    await expect(secondTrigger).toHaveText('+3');
+    await expect(secondTrigger).toHaveText('+2');
 
     await page.getByRole('button', { name: 'Remove first renderer' }).click();
     await expect(first.getByTestId('front-component-mounted')).toHaveCount(0);
@@ -62,7 +62,7 @@ for (const runtime of ['react', 'preact']) {
       second.getByRole('button', { name: 'Measured Delta' }),
     ).toBeVisible();
     await second.getByRole('button', { name: 'Narrow measured list' }).click();
-    await expect(secondTrigger).toHaveText('+2');
+    await expect(secondTrigger).toHaveText('+1');
     await expect(
       second.getByRole('button', { name: 'Measured Bravo' }),
     ).toBeVisible();

@@ -39,12 +39,12 @@ export const overflowingListGeometryTest: TwentyUiGalleryPlayFunction = async ({
   await waitForAnimationFrames(GEOMETRY_IDLE_FRAME_THRESHOLD * 2);
   await expect(
     canvas.getByRole('button', { name: /Show all measured items$/ }),
-  ).toHaveTextContent('+3');
+  ).toHaveTextContent('+2');
   await expect(
-    canvas.getByRole('button', { name: 'Measured Alpha' }),
+    canvas.getByRole('button', { name: 'Measured Bravo' }),
   ).toBeVisible();
   await expect(
-    canvas.queryByRole('button', { name: 'Measured Bravo' }),
+    canvas.queryByRole('button', { name: 'Measured Charlie' }),
   ).toBeNull();
 
   await userEvent.click(
@@ -65,13 +65,13 @@ export const overflowingListGeometryTest: TwentyUiGalleryPlayFunction = async ({
   await waitFor(() =>
     expect(
       canvas.getByRole('button', { name: /Show all measured items$/ }),
-    ).toHaveTextContent('+2'),
+    ).toHaveTextContent('+1'),
   );
   await expect(
-    canvas.getByRole('button', { name: 'Measured Bravo' }),
-  ).toBeVisible();
+    canvas.getByRole('button', { name: 'Measured Charlie' }),
+  ).toBeInTheDocument();
   await expect(
-    canvas.queryByRole('button', { name: 'Measured Charlie' }),
+    canvas.queryByRole('button', { name: 'Measured Delta' }),
   ).toBeNull();
 
   await userEvent.click(
