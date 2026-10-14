@@ -1,12 +1,13 @@
 import { Slider as SliderPrimitive } from '@base-ui/react/slider';
 import { clsx } from 'clsx';
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { mergeClassNames } from '@ui/utilities/internal/mergeClassNames';
 import { isDefined } from '@ui/utilities/utils/isDefined';
 
 import styles from '../Slider.module.scss';
 import { type SliderRootProps } from '../types/SliderRootProps';
+import { SliderControlInitializationEffect } from './SliderControlInitializationEffect';
 import { SliderControlRegistrationContext } from './SliderControlRegistrationContext';
 
 export const SliderRoot = <TValue extends number | readonly number[]>({
@@ -23,12 +24,12 @@ export const SliderRoot = <TValue extends number | readonly number[]>({
     control !== initializedControl &&
     thumbAlignment !== 'center';
 
-  useLayoutEffect(() => {
-    setInitializedControl(control);
-  }, [control]);
-
   return (
     <SliderControlRegistrationContext.Provider value={setControl}>
+      <SliderControlInitializationEffect
+        control={control}
+        onControlInitialized={setInitializedControl}
+      />
       <SliderPrimitive.Root
         {...props}
         thumbAlignment={shouldInitializeControl ? 'center' : thumbAlignment}
