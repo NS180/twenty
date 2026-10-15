@@ -39,15 +39,10 @@ export const useOverflowingListLayout = ({
       return;
     }
 
-    const supportsSynchronousLayout = !('WorkerGlobalScope' in globalThis);
     const observedElements = new Set<Element>();
     const measure = () => {
       const itemElements = Array.from(items.children);
-      const currentElements = new Set<Element>([
-        container,
-        items,
-        ...itemElements,
-      ]);
+      const currentElements = new Set<Element>([container, ...itemElements]);
 
       if (isDefined(triggerRef.current)) {
         currentElements.add(triggerRef.current);
@@ -71,7 +66,6 @@ export const useOverflowingListLayout = ({
       const itemWidths = measureItemWidths({
         items,
         itemElements,
-        supportsSynchronousLayout,
       });
       const gap = parseFloat(getComputedStyle(items).columnGap) || 0;
       const containerWidth = container.clientWidth;

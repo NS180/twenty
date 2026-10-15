@@ -20,7 +20,6 @@ export const SliderControl = ({
     <SliderPrimitive.Control
       {...props}
       ref={mergedRef}
-      data-twenty-ui-slider-control=""
       className={mergeClassNames(styles.control, className)}
     />
   );
