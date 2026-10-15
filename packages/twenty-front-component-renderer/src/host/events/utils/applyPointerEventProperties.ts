@@ -7,7 +7,7 @@ export const applyPointerEventProperties = ({
   domEvent,
 }: {
   serializedEvent: SerializedEventData;
-  domEvent: Partial<Record<keyof PointerEvent, unknown>>;
+  domEvent: Record<string, unknown>;
 }): void => {
   if (isNumber(domEvent.pointerId)) {
     serializedEvent.pointerId = domEvent.pointerId;
