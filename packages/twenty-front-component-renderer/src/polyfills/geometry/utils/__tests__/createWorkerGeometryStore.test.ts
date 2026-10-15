@@ -92,6 +92,18 @@ describe('createWorkerGeometryStore', () => {
     expect(observeElementGeometry).toHaveBeenCalledWith(['0']);
   });
 
+  it('should report an element as measured once a read enrolls it', () => {
+    const { store, rootElement } = createRootedStore();
+    const element = createHostElement(rootElement);
+
+    expect(store.isElementMeasured(element)).toBe(false);
+
+    store.resolveElementSnapshot(element);
+
+    expect(store.isElementMeasured(element)).toBe(true);
+    expect(store.isElementMeasured(rootElement)).toBe(false);
+  });
+
   it('should not enroll the remote root or elements the host renders without a node', async () => {
     const { store, rootElement } = createRootedStore();
     const observeElementGeometry = jest.fn().mockResolvedValue(undefined);

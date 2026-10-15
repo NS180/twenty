@@ -212,6 +212,9 @@ export const createWorkerGeometryStore = (): WorkerGeometryStore => {
       : null;
   };
 
+  const isElementMeasured = (element: object): boolean =>
+    isObservedRemoteElementId(elementOwnerships.get(element)?.remoteElementId);
+
   const releaseElementGeometryWhenUnused = (
     ownership: ElementGeometryOwnership,
   ): void => {
@@ -353,6 +356,7 @@ export const createWorkerGeometryStore = (): WorkerGeometryStore => {
     },
     resolveElementSnapshot,
     readObservedElementSnapshot,
+    isElementMeasured,
     createElementGeometryReader,
   };
 };

@@ -14,5 +14,6 @@ export type WorkerGeometryStore = {
   readObservedElementSnapshot: (
     element: object,
   ) => ElementGeometrySnapshot | null;
+  isElementMeasured: (element: object) => boolean;
   createElementGeometryReader: (element: object) => ElementGeometryReader;
 };

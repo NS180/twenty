@@ -1009,7 +1009,7 @@ Elements can measure themselves: the host mirrors geometry into the sandbox, so 
 | `getClientRects()`                                                                       | Throws                                                                                                           |
 | `window.matchMedia()`                                                                    | Works for a fixed set of features, with `change` events (see below)                                              |
 | `window.innerWidth`, `innerHeight`, `devicePixelRatio`, `scrollX`, `scrollY`             | Work, reporting the **browser viewport**; your widget's own size is `document.body.clientWidth` / `clientHeight` |
-| `window.getComputedStyle()`                                                              | Host layout properties for elements you already measure; the rest, theme variables too, from inline styles       |
+| `window.getComputedStyle()`                                                              | Host layout values for measured elements and their parents; the rest, theme variables too, from inline styles    |
 | `ResizeObserver`                                                                         | Works, from the mirror; `document.body` reports your widget's box                                                |
 | `IntersectionObserver`                                                                   | `ReferenceError` (`typeof` guards do work)                                                                       |
 | `MutationObserver`                                                                       | Works, including `subtree`, `attributeFilter`, old values and `takeRecords()`                                    |

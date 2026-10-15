@@ -130,6 +130,33 @@ describe('installGetComputedStyle', () => {
     expect(geometryStore.resolveElementSnapshot).not.toHaveBeenCalled();
   });
 
+  it('should enroll a container whose child element is already measured', () => {
+    const globalScope: Record<string, unknown> = {};
+    const measuredChild = { nodeType: 1 };
+    const container = {
+      childNodes: [{ nodeType: 3 }, measuredChild],
+      style: { getPropertyValue: () => '0px' },
+    };
+    const geometryStore = createWorkerGeometryStoreStub({
+      isElementMeasured: jest.fn((element) => element === measuredChild),
+      resolveElementSnapshot: jest.fn(() =>
+        createElementGeometrySnapshotFixture({
+          computedStyle: { 'column-gap': '4px' },
+        }),
+      ),
+    });
+    installGetComputedStyle({ globalScope, geometryStore });
+
+    const style = (globalScope.getComputedStyle as GetComputedStyleLike)(
+      container,
+    );
+
+    expect(style.getPropertyValue('column-gap')).toBe('4px');
+    expect(geometryStore.resolveElementSnapshot).toHaveBeenCalledWith(
+      container,
+    );
+  });
+
   it('should keep Object.prototype members callable on the declaration', () => {
     const globalScope: Record<string, unknown> = {};
     installGetComputedStyle({

@@ -3,7 +3,6 @@ import { createTextareaIntrinsicScrollHeightMeasurer } from '../createTextareaIn
 const createAutoResizeTextarea = () => {
   const textarea = document.createElement('textarea');
 
-  textarea.setAttribute('data-auto-resize', 'true');
   textarea.value = 'First\nSecond\nThird';
   textarea.rows = 1;
   textarea.style.blockSize = '130px';
@@ -24,11 +23,11 @@ describe('createTextareaIntrinsicScrollHeightMeasurer', () => {
     document.body.replaceChildren();
   });
 
-  it('should keep ordinary textareas outside intrinsic measurements', () => {
+  it('should keep elements other than textareas outside intrinsic measurements', () => {
     const measurer = createTextareaIntrinsicScrollHeightMeasurer();
-    const textarea = document.createElement('textarea');
+    const element = document.createElement('div');
 
-    expect(measurer.measure(textarea)).toBeUndefined();
+    expect(measurer.measure(element)).toBeUndefined();
     expect(findMeasurementTextareas()).toHaveLength(0);
   });
 

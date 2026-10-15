@@ -9,6 +9,7 @@ import { createStyleProxy } from '@/polyfills/dom/utils/createStyleProxy';
 import { isObjectPrototypeMember } from '@/polyfills/dom/utils/isObjectPrototypeMember';
 import { resolveCssPropertyNameFromJsPropertyName } from '@/polyfills/dom/utils/resolveCssPropertyNameFromJsPropertyName';
 import { type WorkerGeometryStore } from '@/polyfills/geometry/types/WorkerGeometryStore';
+import { hasMeasuredChildElement } from '@/polyfills/geometry/utils/hasMeasuredChildElement';
 import { resolveGlobalScopeInstallTargets } from '@/polyfills/utils/resolveGlobalScopeInstallTargets';
 import { normalizeCssPropertyName } from '@/utils/css/normalizeCssPropertyName';
 
@@ -44,12 +45,16 @@ export const installGetComputedStyle = ({
       return isString(declaredValue) ? declaredValue : '';
     };
 
+    const readMeasuredSnapshot = () =>
+      geometryStore.readObservedElementSnapshot(element) ??
+      (hasMeasuredChildElement({ element, geometryStore })
+        ? geometryStore.resolveElementSnapshot(element)
+        : null);
+
     const readProperty = (propertyName: string): string => {
       const cssPropertyName = normalizeCssPropertyName(propertyName);
       const measuredValue: unknown =
-        geometryStore.readObservedElementSnapshot(element)?.computedStyle?.[
-          cssPropertyName
-        ];
+        readMeasuredSnapshot()?.computedStyle?.[cssPropertyName];
 
       return isString(measuredValue)
         ? measuredValue

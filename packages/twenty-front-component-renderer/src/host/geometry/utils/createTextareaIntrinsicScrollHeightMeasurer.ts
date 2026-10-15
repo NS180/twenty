@@ -89,10 +89,7 @@ export const createTextareaIntrinsicScrollHeightMeasurer =
     };
 
     const measure = (node: Element): number | undefined => {
-      if (
-        !(node instanceof HTMLTextAreaElement) ||
-        !node.hasAttribute('data-auto-resize')
-      ) {
+      if (!(node instanceof HTMLTextAreaElement)) {
         return undefined;
       }
 
