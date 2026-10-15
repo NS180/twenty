@@ -235,13 +235,19 @@ export class AgentAsyncExecutorService {
         agentRunRoleIds,
       }),
     };
-    const { workspaceId, userId, userWorkspaceId, rolePermissionConfig } =
-      toolContext;
+    const {
+      workspaceId,
+      userId,
+      userWorkspaceId,
+      rolePermissionConfig,
+      application,
+    } = toolContext;
 
     const fullCatalog = await this.toolRegistry.buildToolIndex(workspaceId, {
       userId,
       userWorkspaceId,
       rolePermissionConfig,
+      application,
     });
 
     const allowedCategories = new Set(
