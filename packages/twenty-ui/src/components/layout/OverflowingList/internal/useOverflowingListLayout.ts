@@ -39,7 +39,6 @@ export const useOverflowingListLayout = ({
       return;
     }
 
-    const supportsSynchronousLayout = isDefined(globalThis.ResizeObserver);
     const observedElements = new Set<Element>();
     const measure = () => {
       const itemElements = Array.from(items.children);
@@ -67,7 +66,6 @@ export const useOverflowingListLayout = ({
       const itemWidths = measureItemWidths({
         items,
         itemElements,
-        supportsSynchronousLayout,
       });
       const gap = parseFloat(getComputedStyle(items).columnGap) || 0;
       const containerWidth = container.clientWidth;
@@ -95,7 +93,7 @@ export const useOverflowingListLayout = ({
       );
     };
 
-    const observer = supportsSynchronousLayout
+    const observer = isDefined(globalThis.ResizeObserver)
       ? new ResizeObserver(measure)
       : undefined;
 
