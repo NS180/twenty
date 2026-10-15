@@ -8,6 +8,7 @@ import { IsNull, Repository } from 'typeorm';
 import { ApplicationRegistrationVersionEntity } from 'src/engine/core-modules/application/application-registration-version/application-registration-version.entity';
 import { ApplicationRegistrationSourceType } from 'src/engine/core-modules/application/application-registration/enums/application-registration-source-type.enum';
 import { FileStorageService } from 'src/engine/core-modules/file-storage/services/file-storage.service';
+import { FileUrlService } from 'src/engine/core-modules/file/file-url/file-url.service';
 
 import { type ResolvedPackage } from 'src/engine/core-modules/application/application-package/application-package-fetcher.service';
 import { ApplicationRegistrationEntity } from 'src/engine/core-modules/application/application-registration/application-registration.entity';
@@ -36,6 +37,7 @@ export class ApplicationRegistrationVersionService {
     private readonly applicationRegistrationVersionRepository: Repository<ApplicationRegistrationVersionEntity>,
     @InjectRepository(ApplicationRegistrationEntity)
     private readonly applicationRegistrationRepository: Repository<ApplicationRegistrationEntity>,
+    private readonly fileUrlService: FileUrlService,
     private readonly fileStorageService: FileStorageService,
   ) {}
 
@@ -214,5 +216,28 @@ export class ApplicationRegistrationVersionService {
         );
       }
     }
+  }
+
+  async buildTarballDownloadUrl(
+    version: Pick<
+      ApplicationRegistrationVersionEntity,
+      'sourceType' | 'tarballUrl' | 'tarballFile'
+    >,
+  ): Promise<string | null> {
+    if (version.sourceType === ApplicationRegistrationSourceType.NPM) {
+      return version.tarballUrl;
+    }
+
+    const { tarballFile } = version;
+
+    if (!isDefined(tarballFile) || !isDefined(tarballFile.workspaceId)) {
+      return null;
+    }
+
+    return this.fileUrlService.signFileByIdUrl({
+      fileId: tarballFile.id,
+      workspaceId: tarballFile.workspaceId,
+      fileFolder: FileFolder.AppTarball,
+    });
   }
 }
