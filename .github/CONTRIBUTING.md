@@ -53,7 +53,7 @@ git commit -m "Add your detailed description here"
 git push origin your-branch-name
 ```
 
-8. **Create a Pull Request:** Go to the original Twenty repository and create a pull request. Please provide a detailed description of your changes. Submitting a PR means you agree to the CLA.
+8. **Create a Pull Request:** Open your fork on GitHub and create a pull request targeting the original Twenty repository (`twentyhq/twenty`). Select `main` as the base branch and your contribution branch in your fork as the compare branch. Provide a detailed description of your changes. Submitting a PR means you agree to the CLA.
 
 9. **Code Review:** Your pull request will undergo a code review.
 
