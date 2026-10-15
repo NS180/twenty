@@ -80,6 +80,7 @@ import {
 import { mergeLanguageModelUsage } from 'src/engine/metadata-modules/ai/ai-billing/utils/merge-language-model-usage.util';
 import { getCallLevelProviderOptions } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/provider-options.util';
 import { replaceUnsupportedFileParts } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/replace-unsupported-file-parts.util';
+import { resolveAgentCallingApplication } from 'src/engine/metadata-modules/ai/ai-agent-execution/utils/resolve-agent-calling-application.util';
 import { createProposeToolCallTool } from 'src/engine/metadata-modules/ai/ai-agent-execution/tools/propose-tool-call.tool';
 import { createAskQuestionTool } from 'src/engine/metadata-modules/ai/ai-chat/tools/ask-question.tool';
 import { createRequestFormTool } from 'src/engine/metadata-modules/ai/ai-chat/tools/request-form.tool';
@@ -87,6 +88,7 @@ import { buildAiTelemetry } from 'src/engine/metadata-modules/ai/ai-models/utils
 import { AiModelConfigService } from 'src/engine/metadata-modules/ai/ai-models/services/ai-model-config.service';
 import { AiModelRegistryService } from 'src/engine/metadata-modules/ai/ai-models/services/ai-model-registry.service';
 import { type NativeModelToolOptions } from 'src/engine/metadata-modules/ai/ai-models/types/native-model-tool-options.type';
+import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import {
   AiException,
   AiExceptionCode,
@@ -107,6 +109,7 @@ type ProposableTools = {
 type RegistryToolContext = Pick<
   ToolContext,
   | 'workspaceId'
+  | 'application'
   | 'authContext'
   | 'actorContext'
   | 'userId'
@@ -144,6 +147,7 @@ export class AgentAsyncExecutorService {
     private readonly aiAgentRoleService: AiAgentRoleService,
     @InjectRepository(WorkspaceEntity)
     private readonly workspaceRepository: Repository<WorkspaceEntity>,
+    private readonly workspaceCacheService: WorkspaceCacheService,
   ) {}
 
   private resolveUserIdentity(authContext?: WorkspaceAuthContext): {
@@ -405,9 +409,19 @@ export class AgentAsyncExecutorService {
         let registryTools: ToolSet = {};
 
         if (isDefined(agentRoleId)) {
+          const { flatApplicationMaps } =
+            await this.workspaceCacheService.getOrRecompute(agent.workspaceId, [
+              'flatApplicationMaps',
+            ]);
+
           const toolContext: RegistryToolContext = {
             workspaceId: agent.workspaceId,
             agentId: agent.id,
+            application: resolveAgentCallingApplication({
+              agentApplication: flatApplicationMaps.byId[agent.applicationId],
+              workspaceCustomApplicationId:
+                workspace?.workspaceCustomApplicationId,
+            }),
             authContext,
             actorContext,
             ...this.resolveUserIdentity(authContext),
